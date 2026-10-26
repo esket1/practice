@@ -62,6 +62,15 @@ create table if not exists Return
     Created_at timestamptz not null default now(),
     Accepted_by_ID int not null references User (ID_User)
 );
+create table if not exists UserBlock
+(
+    ID_UserBlock serial not null constraint PK_UserBlock primary key,
+    User_ID int not null references User (ID_User)
+);
+create table if not exists 
+(
+
+);
 create table if not exists 
 (
 
