@@ -26,7 +26,7 @@ create table if not exists Status
 create table if not exists User
 (
     ID_User serial not null constraint PK_User primary key,
-    email varchar(255) not null,
+    email varchar(255) not null unique,
     password_hash text not null,
     name varchar(255) not null,
     last_name varchar(255) not null,
