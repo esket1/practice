@@ -1,29 +1,29 @@
 -- DBM - https://www.drawdb.app/editor?shareId=ba3f06afec2a69e25aa2aa3824bdd880
 
 
-create table if not exists Role
+create table if not exists Role -- DONE
 (
     ID_Role serial not null constraint PK_Role primary key,
     Name varchar(50) not null unique
 );
-create table if not exists Category
+create table if not exists Category -- DONE
 (
     ID_Category serial not null constraint PK_Category primary key,
     Name varchar(50) not null unique
 );
-create table if not exists Location
+create table if not exists Location -- DONE
 (
     ID_Location serial not null constraint PK_Location primary key,
     Name varchar(255) not null unique,
     Type varchar(255) not null
 );
-create table if not exists Status
+create table if not exists Status -- DONE
 (
     ID_Status serial not null constraint PK_Status primary key,
     Name varchar(50) not null unique,
     Code varchar(50) not null unique -- available, issued, in_repair, written_off
 );
-create table if not exists Users
+create table if not exists Users -- DONE
 (
     ID_Users serial not null constraint PK_Users primary key,
     Email varchar(255) not null unique,
