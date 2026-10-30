@@ -74,7 +74,7 @@ create table if not exists Return
 );
 create index if not exists index_Return_Assignment on Return (Assignment_ID);
 create index if not exists index_Return_Users on Return (Users_ID);
-create table if not exists UserBlock
+create table if not exists UserBlock -- DONE (дописать проверки)
 (
     ID_UserBlock serial not null constraint PK_UserBlock primary key,
     Reason varchar(255) not null,
@@ -84,7 +84,7 @@ create table if not exists UserBlock
 );
 create index if not exists index_UserBlock_Users on UserBlock (Users_ID);
 create index if not exists index_UserBlock_Blocked_by_ID on UserBlock (Blocked_by_ID);
-create table if not exists UserUnblock
+create table if not exists UserUnblock -- DONE
 (
     ID_UserUnblock serial not null constraint PK_UserUnblock primary key,
     Reason varchar(255) not null,
@@ -94,7 +94,7 @@ create table if not exists UserUnblock
 );
 create index if not exists index_UserUnblock_UserBlock on UserUnblock (UserBlock_ID);
 create index if not exists index_UserUnblock_Users on UserUnblock (Users_ID);
-create table if not exists LocationLog
+create table if not exists LocationLog -- DONE
 (
     ID_LocationLog serial not null constraint PK_LocationLog primary key,
     Created_at timestamptz not null default now(),

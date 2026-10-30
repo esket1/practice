@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 function auth(req, res, next) {
-  function auth(req, res, next) {
   const header = req.headers.authorization || '';
   const [type, token] = header.split(' ');
 
@@ -16,7 +15,6 @@ function auth(req, res, next) {
   } catch (err) {
     return res.status(401).json({ error: 'Токен недействителен или просрочен' });
   }
-}
 }
 
 
