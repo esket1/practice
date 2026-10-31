@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool } = require('../db');
 const { auth, requireRole } = require('../middleware/auth');
+const { validateIdParam, validateBody, validateIdsBody } = require('../middleware/validator');
 
 const router = express.Router();
 
@@ -16,11 +17,8 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-router.get('/:id', auth, async (req, res) => {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id < 1) {
-        return res.status(400).json({ error: 'Некорректный id' });
-    }
+router.get('/:id', auth, validateIdParam('id'), async (req, res) => {
+    const {id} = req.params;
     try {
         const result = await pool.query(
             `select ID_Return as "idReturn", Created_at as "returnDate", Assignment_ID as "assignmentId", Users_ID as "usersId" from Return
@@ -36,17 +34,8 @@ router.get('/:id', auth, async (req, res) => {
     }
 });
 
-router.post('/', auth, requireRole(), async (req, res) => {
-    const assignmentId = Number(req.body.assignmentId);
-    const usersId = Number(req.body.usersId);
-
-    if (!Number.isInteger(assignmentId) || assignmentId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID выдачи' });
-    }
-    if (!Number.isInteger(usersId) || usersId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID пользователя' });
-    }
-
+router.post('/', auth, requireRole(), validateIdsBody(['assignmentId', 'usersId']), async (req, res) => {
+    const {assignmentId, usersId} = req.body;
     try {
         const result = await pool.query(
             `insert into Return (Assignment_ID, Users_ID) values ($1, $2)

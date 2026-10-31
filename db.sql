@@ -52,7 +52,7 @@ create index if not exists index_Equipment_Category on Equipment (Category_ID);
 create index if not exists index_Equipment_Location on Equipment (Location_ID);
 create index if not exists index_Equipment_Inventory_number on Equipment (Inventory_number); -- US/AC 4
 create index if not exists index_Equipment_Name on Equipment (Name); -- US/AC 4
-create table if not exists Assignment -- DONE (проверить)
+create table if not exists Assignment -- DONE (проверить) +
 (
     ID_Assignment serial not null constraint PK_Assignment primary key,
     Due_at timestamptz not null,
@@ -65,7 +65,7 @@ create index if not exists index_Assignment_Equipment on Assignment (Equipment_I
 create index if not exists index_Assignment_Users on Assignment (Users_ID);
 create index if not exists index_Assignment_Issued_by on Assignment (Issued_by_ID);
 create index if not exists index_Assignment_Due_at on Assignment (Due_at); -- просрочки, US/AC 7 и 9
-create table if not exists Return -- DONE (проверить)
+create table if not exists Return -- DONE (проверить) +
 (
     ID_Return serial not null constraint PK_Return primary key,
     Created_at timestamptz not null default now(),
@@ -74,7 +74,7 @@ create table if not exists Return -- DONE (проверить)
 );
 create index if not exists index_Return_Assignment on Return (Assignment_ID);
 create index if not exists index_Return_Users on Return (Users_ID);
-create table if not exists UserBlock -- DONE (дописать проверки)
+create table if not exists UserBlock -- DONE (дописать проверки) +
 (
     ID_UserBlock serial not null constraint PK_UserBlock primary key,
     Reason varchar(255) not null,
@@ -84,7 +84,7 @@ create table if not exists UserBlock -- DONE (дописать проверки)
 );
 create index if not exists index_UserBlock_Users on UserBlock (Users_ID);
 create index if not exists index_UserBlock_Blocked_by_ID on UserBlock (Blocked_by_ID);
-create table if not exists UserUnblock -- DONE
+create table if not exists UserUnblock -- DONE +
 (
     ID_UserUnblock serial not null constraint PK_UserUnblock primary key,
     Reason varchar(255) not null,
@@ -94,7 +94,7 @@ create table if not exists UserUnblock -- DONE
 );
 create index if not exists index_UserUnblock_UserBlock on UserUnblock (UserBlock_ID);
 create index if not exists index_UserUnblock_Users on UserUnblock (Users_ID);
-create table if not exists LocationLog -- DONE
+create table if not exists LocationLog -- DONE +
 (
     ID_LocationLog serial not null constraint PK_LocationLog primary key,
     Created_at timestamptz not null default now(),
@@ -107,7 +107,7 @@ create index if not exists index_LocationLog_Equipment on LocationLog (Equipment
 create index if not exists index_LocationLog_Users on LocationLog (Users_ID);
 create index if not exists index_LocationLog_OldLocation on LocationLog (OldLocation_ID);
 create index if not exists index_LocationLog_NewLocation on LocationLog (NewLocation_ID);
-create table if not exists StatusLog -- DONE (проверить)
+create table if not exists StatusLog -- DONE (проверить) +
 (
     ID_StatusLog serial not null constraint PK_StatusLog primary key,
     Created_at timestamptz not null default now(),

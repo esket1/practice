@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool } = require('../db');
 const { auth, requireRole } = require('../middleware/auth');
+const { validateIdParam, validateBody, validateIdsBody } = require('../middleware/validator');
 
 const router = express.Router();
 
@@ -16,11 +17,8 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-router.get('/:id', auth, async (req, res) => {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id < 1) {
-        return res.status(400).json({ error: 'Некорректный id' });
-    }
+router.get('/:id', auth, validateIdParam('id'), async (req, res) => {
+    const { id } = req.params;
     try {
         const result = await pool.query(
             `ID_Assignment as "idAssignment", due_At as "dueAt", Created_at as a "createdAt", Equipment_ID as "equipmentId", Users_ID as "usersId", Issued_by_ID as "issuedById" from Assignment
@@ -36,24 +34,9 @@ router.get('/:id', auth, async (req, res) => {
     }
 });
 
-router.post('/', auth, requireRole(), async (req, res) => {
-    const dueAt = req.body.dueAt;
-    const equipmentId = Number(req.body.equipmentId);
-    const usersId = Number(req.body.usersId);
-    const issuedById = Number(req.body.issuedById);
-
-    if (!dueAt) {
-        return res.status(400).json({ error: 'Заполните все обязательные поля' });
-    }
-    if (!Number.isInteger(equipmentId) || equipmentId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID оборудования' });
-    }
-    if (!Number.isInteger(usersId) || usersId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID пользователя' });
-    }
-    if (!Number.isInteger(issuedById) || issuedById < 1) {
-        return res.status(400).json({ error: 'Некорректный ID выдавшего' });
-    }
+router.post('/', auth, requireRole(), validateBody('dueAt'), validateIdsBody(['equipmentId', 'usersId']), async (req, res) => {
+    const { dueAt, equipmentId, usersId } = req.body;
+    const { issuedById } = req.user;
 
     try {
         const result = await pool.query(
@@ -74,26 +57,10 @@ router.post('/', auth, requireRole(), async (req, res) => {
 }
 )
 
-router.put('/:id', auth, requireRole(), async (req, res) => {
-    const id = req.user.id
-    const dueAt = req.body.dueAt;
-    const equipmentId = Number(req.body.equipmentId);
-    const usersId = Number(req.body.usersId);
-    const issuedById = Number(req.body.issuedById);
-
-    if (!dueAt) {
-        return res.status(400).json({ error: 'Заполните все обязательные поля' });
-    }
-    if (!Number.isInteger(equipmentId) || equipmentId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID оборудования' });
-    }
-    if (!Number.isInteger(usersId) || usersId < 1) {
-        return res.status(400).json({ error: 'Некорректный ID пользователя' });
-    }
-    if (!Number.isInteger(issuedById) || issuedById < 1) {
-        return res.status(400).json({ error: 'Некорректный ID выдавшего' });
-    }
-
+router.put('/:id', auth, requireRole(), validateIdParam('id'), validateBody('dueAt'), validateIdsBody(['equipmentId', 'usersId']), async (req, res) => {
+    const { id } = req.params;
+    const { issuedById } = req.user;
+    const { dueAt, equipmentId, usersId } = req.body;
     try {
         const result = await pool.query(
             `update Assignment set due_At = $1, Equipment_ID = $2, Users_ID = $3, Issued_by_ID = $4 where ID_Assignment = $5
