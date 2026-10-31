@@ -1,12 +1,13 @@
 const express = require('express');
 const { pool } = require('../db');
 const { auth, requireRole } = require('../middleware/auth');
+const { validateIdParam, validateBody } = require('../middleware/validator');
 
 const router = express.Router();
 
 router.get('/', auth, async (req, res) => {
   try {
-    const result = await pool.query('select id_status, name, type from status order by id_status');
+    const result = await pool.query('select id_status as "idStatus", name, type from status');
     return res.status(200).json({ items: result.rows });
   } catch (err) {
     console.log(err);
@@ -14,14 +15,11 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-router.get('/:id', auth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id < 1) {
-    return res.status(400).json({ error: 'Некорректный id' });
-  }
+router.get('/:id', auth, validateIdParam('id'), async (req, res) => {
+  const { id } = req.params;
   try {
-    const result = await pool.query('select id_status, name, type from status where id_status = $1', 
-        [id]);
+    const result = await pool.query('select id_status as "idStatus", name, type from status where id_status = $1',
+      [id]);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Статус не найдена' });
     }
@@ -32,18 +30,14 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-router.post('/', auth, requireRole(), async (req, res) => {
-  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
-  const type = typeof req.body.type === 'string' ? req.body.type.trim() : '';
-  if (!name || !type) {
-    return res.status(400).json({ error: 'Заполните все обязательные поля' });
-  }
+router.post('/', auth, requireRole(), validateBody(['name', 'type']), async (req, res) => {
+  const { name, type } = req.body;
   try {
-     const result = await pool.query(
-      'insert into status (name, type) values ($1, $2) returning id_status, name, type',
+    const result = await pool.query(
+      'insert into status (name, type) values ($1, $2) returning id_status as "idStatus", name, type',
       [name, type]
     );
-    
+
     return res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') {
@@ -53,14 +47,11 @@ router.post('/', auth, requireRole(), async (req, res) => {
     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 
-  }
+}
 )
 
-router.delete('/:id', auth, requireRole(), async (req, res) => {
-  const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id < 1) {
-    return res.status(400).json({ error: 'Некорректный id' });
-  }
+router.delete('/:id', auth, requireRole(), validateIdParam('id'), async (req, res) => {
+  const { id } = req.params;
   try {
     const result = await pool.query(
       'delete from status where id_status = $1',
@@ -76,35 +67,29 @@ router.delete('/:id', auth, requireRole(), async (req, res) => {
     console.log(err);
     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
-   return res.status(200).json({ success: true, deleted_id: id });
+  return res.status(200).json({ success: true, deleted_id: id });
 })
 
-router.put('/:id', auth, requireRole(), async (req, res) => {
-    const id = Number(req.params.id);
-    const newName = typeof req.body.newName === 'string' ? req.body.newName.trim() : '';
-    const newType = typeof req.body.newType === 'string' ? req.body.newType.trim() : '';
-    if (!newName || !newType ) {
-        return res.status(400).json({ error: 'Заполните все обязательные поля' });
+router.put('/:id', auth, requireRole(), validateIdParam('id'), validateBody(['name', 'type']), async (req, res) => {
+  const { id } = req.params;
+  const { name, type } = req.body;
+  try {
+    const result = await pool.query(
+      `update status set name = $1, type = $2 where id_status = $3
+             returning id_status as "idStatus", name, type`,
+      [name, type, id]
+    )
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Статус не найден' });
     }
-    if (!Number.isInteger(id) || id < 1) {
-    return res.status(400).json({ error: 'Некорректный id' });
-     }
-    try {
-        const result = await pool.query(
-            'update status set name = $1, type = $2 where id_status = $3',
-            [newName, newType, id]
-        )
-        if (result.rowCount === 0) {
-        return res.status(404).json({ error: 'Статус не найден' });
-        }
-    } catch (err) {
-        if (err.code === '23505') {
-            return res.status(409).json({ error: 'Название уже существует и не является уникальным' });
-        }
-        console.log(err);
-        return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Название уже существует и не является уникальным' });
     }
-    return res.status(200).json({ success: true, id, newName, newType });
+    console.log(err);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  }
 })
 
 module.exports = router;

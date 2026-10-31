@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', auth, async (req, res) => {
   try {
     const result = await pool.query(
-      'select id_userunblock, reason, unblocked_at, userblock_id, users_id from userunblock'
+      'select id_userunblock as "idUserUnblock", reason, unblocked_at as "unblockedAt", userblock_id as "userBlockId", users_id as "usersId" from userunblock'
     );
     return res.status(200).json({ items: result.rows });
   } catch (err) {
@@ -23,7 +23,7 @@ router.get('/:id', auth, async (req, res) => {
   }
   try {
     const result = await pool.query(
-      'select id_userunblock, reason, unblocked_at, userblock_id, users_id from userunblock where id_userunblock = $1',
+      'select id_userunblock as "idUserUnblock", reason, unblocked_at as "unblockedAt", userblock_id as "userBlockId", users_id as "usersId" from userunblock where id_userunblock = $1',
         [id]);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Разблокировка не найдена' });
@@ -36,10 +36,10 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 router.post('/', auth, requireRole(), async (req, res) => {
-    const reason = typeof req.body.Reason === 'string' ? req.body.Reason.trim() : '';
-    const userBlock_id = Number(req.body.UserBlock_ID);
-    const users_ID = req.user.id
-  if (!Number.isInteger(userBlock_id) || userBlock_id < 1) {
+    const reason = typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
+    const userBlockId = Number(req.body.userBlockId);
+    const usersId = req.user.id
+  if (!Number.isInteger(userBlockId) || userBlockId < 1) {
     return res.status(400).json({ error: 'Некорректный ID блокировки' });
   }
   if (!reason) {
@@ -47,8 +47,9 @@ router.post('/', auth, requireRole(), async (req, res) => {
   }
    try {
      const result = await pool.query(
-      'insert into userunblock (reason, UserBlock_ID, Users_ID) values ($1, $2, $3) returning id_userunblock, reason, unblocked_at, userblock_id, users_id',
-      [reason, userBlock_id, users_ID]
+      `insert into userunblock (reason, UserBlock_ID, Users_ID) values ($1, $2, $3) 
+      returning id_userunblock as "idUserUnblock", reason, unblocked_at as "unblockedAt", userblock_id as "userBlockId", users_id as "usersId"`,
+      [reason, userBlockId, usersId]
     );
     
     return res.status(201).json(result.rows[0]);

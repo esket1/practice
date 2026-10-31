@@ -1,29 +1,29 @@
 -- DBM - https://www.drawdb.app/editor?shareId=ba3f06afec2a69e25aa2aa3824bdd880
 
 
-create table if not exists Role -- DONE
+create table if not exists Role -- DONE +
 (
     ID_Role serial not null constraint PK_Role primary key,
     Name varchar(50) not null unique
 );
-create table if not exists Category -- DONE
+create table if not exists Category -- DONE +
 (
     ID_Category serial not null constraint PK_Category primary key,
     Name varchar(50) not null unique
 );
-create table if not exists Location -- DONE
+create table if not exists Location -- DONE +
 (
     ID_Location serial not null constraint PK_Location primary key,
     Name varchar(255) not null unique,
     Type varchar(255) not null
 );
-create table if not exists Status -- DONE
+create table if not exists Status -- DONE +
 (
     ID_Status serial not null constraint PK_Status primary key,
     Name varchar(50) not null unique,
     Code varchar(50) not null unique -- available, issued, in_repair, written_off
 );
-create table if not exists Users -- DONE
+create table if not exists Users -- DONE +
 (
     ID_Users serial not null constraint PK_Users primary key,
     Email varchar(255) not null unique,
@@ -36,7 +36,7 @@ create table if not exists Users -- DONE
 );
 create index if not exists index_Users_Role on Users (Role_ID);
 create unique index if not exists unique_Users_Email_lower on Users (lower(Email)); -- email без учёта регистра
-create table if not exists Equipment
+create table if not exists Equipment -- DONE (проверить+логирование) +
 (
     ID_Equipment serial not null constraint PK_Equipment primary key,
     Name varchar(255) not null,
@@ -52,7 +52,7 @@ create index if not exists index_Equipment_Category on Equipment (Category_ID);
 create index if not exists index_Equipment_Location on Equipment (Location_ID);
 create index if not exists index_Equipment_Inventory_number on Equipment (Inventory_number); -- US/AC 4
 create index if not exists index_Equipment_Name on Equipment (Name); -- US/AC 4
-create table if not exists Assignment
+create table if not exists Assignment -- DONE (проверить)
 (
     ID_Assignment serial not null constraint PK_Assignment primary key,
     Due_at timestamptz not null,
@@ -65,7 +65,7 @@ create index if not exists index_Assignment_Equipment on Assignment (Equipment_I
 create index if not exists index_Assignment_Users on Assignment (Users_ID);
 create index if not exists index_Assignment_Issued_by on Assignment (Issued_by_ID);
 create index if not exists index_Assignment_Due_at on Assignment (Due_at); -- просрочки, US/AC 7 и 9
-create table if not exists Return
+create table if not exists Return -- DONE (проверить)
 (
     ID_Return serial not null constraint PK_Return primary key,
     Created_at timestamptz not null default now(),
@@ -107,7 +107,7 @@ create index if not exists index_LocationLog_Equipment on LocationLog (Equipment
 create index if not exists index_LocationLog_Users on LocationLog (Users_ID);
 create index if not exists index_LocationLog_OldLocation on LocationLog (OldLocation_ID);
 create index if not exists index_LocationLog_NewLocation on LocationLog (NewLocation_ID);
-create table if not exists StatusLog
+create table if not exists StatusLog -- DONE (проверить)
 (
     ID_StatusLog serial not null constraint PK_StatusLog primary key,
     Created_at timestamptz not null default now(),
